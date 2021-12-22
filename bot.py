@@ -22,7 +22,7 @@ def gen_random():
 
 
 parser = argparse.ArgumentParser(description='Github username checker')
-parser.add_argument("-r", "--random", help="do something")
+parser.add_argument("-r", "--random", help="Specify amount of threads")
 parser.add_argument("-f", "--file", help="Specifcy a file location")
 args = parser.parse_args()
 if args.file == None and args.random == None:
