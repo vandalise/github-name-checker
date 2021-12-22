@@ -1,56 +1,37 @@
+import argparse, threading, requests
 from random_word import RandomWords
 rand = RandomWords()
-import requests
-import threading
-import os
 
-def check_random():
+def check_from_file(file):
+    for name in open(file, "r").read().splitlines():
+        r = requests.get(f"https://github.com/{name}")
+        if r.status_code == 404:
+            print(f"[+] Available : {name}")
+
+def gen_random():
     while True:
-        try:
-            name = rand.get_random_word(hasDictionaryDef="true")
-            if name == None:
-                pass
-            else:
-                if name.isalnum() == True:
-                    r = requests.get(f"https://github.com/{name}")
-                    if r.status_code == 404:
-                        print(f"[+] Available : {name}")
-                    else:
-                        pass
-                else:
-                    pass
-        except:
+        name = rand.get_random_word()
+        if name == None:
             pass
-
-def check_from_list(filepath):
-    file = open(filepath, "r").read().splitlines()
-    for name in file:
-        if name.isalnum() == True:
-            r = requests.get(f"https://github.com/{name}")
+        elif name.isalnum() == False:
+            pass
+        else:
+            r = requests.get(f"https://github.com/{name}") 
             if r.status_code == 404:
                 print(f"[+] Available : {name}")
-            else:
-                pass
 
-def main():
-    print("[1] Check random generated names\n[2] Check names from file")
-    try:
-        option = int(input("> "))
-    except ValueError:
-        main()
-    if option not in(1, 2):
-        main()
-    elif option == 1:
-        threads = []
-        for i in range(10):
-            t = threading.Thread(target=check_random)
-            threads.append(t)
-            t.start()
-    elif option == 2:
-        filepath = input("File path (ex: names.txt): ")
-        if os.path.exists(filepath):
-            check_from_list(filepath)
-        else:
-            main()
 
-main()
+parser = argparse.ArgumentParser(description='Github username checker')
+parser.add_argument("-r", "--random", help="do something")
+parser.add_argument("-f", "--file", help="Specifcy a file location")
+args = parser.parse_args()
+if args.file == None and args.random == None:
+    parser.print_help()
+elif args.file:
+    check_from_file(file=args.file)
+elif args.random:
+    threads = []
+    for i in range(int(args.random)):
+        proc = threading.Thread(target=gen_random)
+        proc.start()
+        threads.append(proc)
